@@ -4,9 +4,9 @@
  * Javascript library for collaborative filtering / recommendation engine. 
  */
  
-DESCENT_STEPS = 2000; // number of iterations to execute gradient descent. 
-ALPHA = 0.0005;       // learning rate
-BETA = 0.0007;        // regularization factor
+DESCENT_STEPS = 2000; // number of iterations to execute gradient descent 
+ALPHA = 0.0005;       // learning rate, should be small
+BETA = 0.0007;        // regularization factor, should be small
  
 train(inputMatrix)
 {
@@ -24,18 +24,28 @@ train(inputMatrix)
     var error = calculateError(P, Q, inputMatrix);
     
     // update P and Q accordingly
+    P_prime = update(P, error);
+    Q_prime = update(Q, error);
     
+    P = P_prime;
+    Q = Q_prime;
   }
+  
+  // produce the final estimation by multiplying P and Q
+  var estimatedArray = P x Q; 
 }
 
+// Generates a random Matrix of size rows x columns
 generateRandomArray(rows, columns)
 {
 
 }
 
+// For a given entity index, returns all item ids that had no rating for that item. 
+//     Results are sorted in order of descenting estimated value.
 getRecommendations(index)
 {
-
+  
 }
  
  
