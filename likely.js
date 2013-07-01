@@ -8,7 +8,7 @@ DESCENT_STEPS = 2000; // number of iterations to execute gradient descent
 ALPHA = 0.0005;       // learning rate, should be small
 BETA = 0.0007;        // regularization factor, should be small
  
-train(inputMatrix)
+module.exports.train(inputMatrix)
 {
   // Generate random P and Q based on the dimensions of inputMatrix
   N = inputMatrix.length;    // number of rows 
@@ -36,7 +36,7 @@ train(inputMatrix)
 }
 
 // Generates a random Matrix of size rows x columns
-generateRandomArray(rows, columns)
+module.exports.generateRandomArray(rows, columns)
 {
 
 }
