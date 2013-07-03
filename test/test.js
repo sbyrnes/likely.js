@@ -4,6 +4,7 @@
 var sylvester = require('sylvester');
 var Recommender = require('../likely.js');
 
+// Test random matrix generation
 exports['test generateRandomMatrix#size'] = function(beforeExit, assert){
 	var M1 = Recommender.generateRandomMatrix(4,3);
 
@@ -23,6 +24,7 @@ exports['test generateRandomMatrix#random'] = function(beforeExit, assert){
 	assert.equal(false, M1.eql(M2));
 };
 
+// Test the calculation of error values
 exports['test calculateError#values'] = function(beforeExit, assert){
 	var P = $M([[2, 2],[2, 2],[2, 2]]);
 	var Q = $M([[2, 2, 2],[2, 2, 2]]);

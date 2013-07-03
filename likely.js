@@ -12,6 +12,7 @@ var BETA = 0.0007;        // regularization factor, should be small
 var k = 2; 				  // number of features to simulate
 
 // Model storage
+// TODO: make this stateless
 var P_model;
 var Q_model;
 var estimatedResult;
@@ -33,8 +34,8 @@ module.exports.train = function(inputMatrix)
     var error = calculateError(P_model, Q_model, inputMatrix);
     
     // update P and Q accordingly
-    P_prime = update(P, error);
-    Q_prime = update(Q, error);
+    P_prime = updateP(P, Q, error);
+    Q_prime = updateQ(Q, P, error);
     
     P_model = P_prime;
     Q_model = Q_prime;
@@ -58,13 +59,43 @@ module.exports.calculateError = function(P, Q, input)
 	// calculate R' as the result of P x Q
 	var R_prime = P.x(Q); 
 	
-	// Error is R - R'
+	// Error is (R - R')
 	return input.subtract(R_prime);
 }
 
-function update(Matrix, error)
+// Computes the total error based on a matrix of error values
+module.exports.calculateTotalError(error)
 {
+	var totError = 0;
+	for(int i = 0; i < error.rows(); i++)
+	{
+		for(int j = 0; j < error.columns(); j++)
+		{
+			totError += pow(error.e(i, j), 2);
+		}
+	}
+	
+	return totError;
+}
 
+function updateP(P, Q, error)
+{
+	// Start with original
+	var P_prime = P.dup();
+	
+	// Gradient descent factor Alpha*2*Error*Q
+	
+	P_prime.subtract(Error.x(Q).x(2 * Alpha));
+	
+	// Regularization, subtract Alpha*Beta*P
+	P_prime.subtract(P.x(ALPHA * BETA));
+	
+	return P_prime;
+}
+
+function updateQ(Q, P, error)
+{
+	
 }
 
 // For a given entity index, returns all item ids that had no rating for that item. 
