@@ -23,7 +23,7 @@ Usage
     
 To use Likely, require the likely module and follow the 3 steps below.
 
-    var Recommender = require('likely.js');
+    var Recommender = require('likely');
     
 #### STEP 1. Assemble the input
 Create an input matrix where rows are users and the columns are items
