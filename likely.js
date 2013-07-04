@@ -79,7 +79,7 @@ function train(inputMatrix)
     }
     
     // if we've already reached the error threshold, no need to descend further
-    var totError = calculateTotalError(error.dup());
+    var totError = calculateTotalError(error);
     //console.log('total error: ' + totError);
     if(totError < MAX_ERROR)
     {
@@ -110,7 +110,12 @@ function calculateError(estimated, input)
 // Computes the total error based on a matrix of error values
 function calculateTotalError(estimated, input)
 {
-	var errorMatrix = calculateError(estimated, input);
+	return calculateTotalError(calculateError(estimated, input));
+}
+
+// Computes the total error based on a matrix of error values
+function calculateTotalError(errorMatrix)
+{
 	var totError = 0.0;
 	for(var i = 1; i <= errorMatrix.rows(); i++)
 	{

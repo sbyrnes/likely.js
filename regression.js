@@ -27,7 +27,7 @@ var errorMatrix = Recommender.calculateError(estimate, input);
 prettyPrint(errorMatrix);
 
 console.log('\nTotal Error: ');
-var error = Recommender.calculateTotalError(estimate, input);
+var error = Recommender.calculateTotalError(errorMatrix);
 console.log(error);
 
 console.log('\n');
