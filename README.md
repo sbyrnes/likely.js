@@ -1,9 +1,5 @@
 likely.js
 =========
-
-***NOTE: Likely.js is a work in progress. You probably already figured that out from the fact that it is just a README right now 
-but it will be more soon!***
-
 A javascript library for collaborative filtering and recommendation engines designed for node.js
 
 Usage 
@@ -11,6 +7,7 @@ Usage
     
     Recommender = require('likely.js');
     
+    // STEP 1. Assemble the input
     // Input matrix where rows are input entities (such as users) and the columns are items
     //    A cell represents the rating of that item by the entity. inputMatrix[0][1] is the 
     //    rating of item 1 by user 0
@@ -18,15 +15,33 @@ Usage
                         [ 4, 0, 5, 6 ],
                         [ 7, 8, 0, 9 ]
                       ];
+                      
+    // Labels to provide more context to the input. Row 0 of the input matrix corresponds to label rowLabels[0]
+    var rowLabels = ['John', 'Sue', 'Joe'];
+    var colLabels = ['Red', 'Blue', 'Green', 'Purple'];
+    // Using these values, John rates Red 1 while Joe rates Red 7. Sue has no rating for Blue.
 
-    var Prediction = Recommender.train(trainingMatrix);
+	// STEP 2. Train the model
+	// Using the inputMatrix you build a model, which estimates the ratings for all entities for all users. 
+	var Model = Recommender.buildModel(inputMatrix, rowLabels, colLabels);
+    
+    // or, if you don't have or care about labels
+    
+    var Model = Recommender.buildModel(inputMatrix);
     
     // Prediction is now a matrix of the same size as inputMatrix but with estimates ratings for
     // all items for all entities. 
     
-    var recommendedList = Prediction.getRecommendations(0);
-    
-    // recommendedList is now a sorted list of all items not rated by user 0, sorted by the estimated rating.
+    // STEP 3. Extract recommendations
+	// Retrieve a list of all items not already rated by a user, sorted by estimated ratings
+	var recommendations = model.recommendations('John');
+	
+	// recommendations = [['Purple', 1.34]];
+
+	// Retrieve a list of all items, sorted by the ratings for a given user (both estimated and actual)
+	var allItems = model.rankAllItems('John');
+	
+	// allItems = [['Green', 3.00], ['Blue', 2.00], ['Purple', 1.34], ['Red', 1.00]];
 
 Description
 ---------
@@ -50,3 +65,7 @@ the inputMatrix but something that closely approximates it. The effect of this a
 values not provided in the inputMatrix. 
 
 These estimated values are what are used to provide the recommendations.
+
+Likely.js uses Stochastic Gradient Descent to estimate P and Q which, while simple, can be slow for very large input matrices.
+This is the most basic but effective method of recommendations that was highlighted in the Netflix prize: 
+http://www2.research.att.com/~volinsky/papers/ieeecomputer.pdf 

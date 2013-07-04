@@ -30,9 +30,115 @@ exports['test calculateError#values'] = function(beforeExit, assert){
 	var Q = $M([[2, 2, 2],[2, 2, 2]]);
 	var input = $M([[8, 8, 8],[8, 8, 8],[8, 8, 8]]);
 	
-	var error = Recommender.calculateError(P, Q, input);
+	var error = Recommender.calculateError(P.x(Q), input);
 	
 	var expectedError = sylvester.Matrix.Zeros(3, 3);
 	
 	assert.equal(true, expectedError.eql(error));
+};
+
+// Test the calculation of total error 
+exports['test calculateTotalError#values'] = function(beforeExit, assert){
+	var error = sylvester.Matrix.Zeros(3, 3);
+	
+	assert.equal(0, Recommender.calculateTotalError(error));
+
+	error = $M([[1, -2, 0.5],[1, 0, -2]]);
+	
+	assert.equal(10.25, Recommender.calculateTotalError(error));
+};
+
+// Test the Model object's ability to return all items sorted by rating, with labels provided
+exports['test Model#rankAllItems|withLabels'] = function(beforeExit, assert){
+    var rowLabels = ['John', 'Sue', 'Joe'];
+    var colLabels = ['Red', 'Blue', 'Green', 'Purple'];
+    var inputMatrix = [ [ 1, 2, 3, 0 ],
+                        [ 4, 0, 5, 6 ],
+                        [ 7, 8, 0, 9 ]
+                      ];
+    var estimatedMatrix = [ [ 1, 2, 3, 0.5 ],
+                        	[ 4, 0.5, 5, 6 ],
+                        	[ 7, 8, 0.5, 9 ]
+                      	];      
+                      	
+    var model = new Recommender.Model($M(inputMatrix), rowLabels, colLabels);
+    model.estimated = $M(estimatedMatrix);        
+    
+    var sueArray = model.rankAllItems('Sue');
+    
+    assert.equal(4, sueArray.length);     
+    assert.equal('Purple', sueArray[0][0]);  
+    assert.equal('Green', sueArray[1][0]);       
+    assert.equal('Red', sueArray[2][0]);       
+    assert.equal('Blue', sueArray[3][0]);            
+};
+
+// Test the Model object's ability to return all items sorted by estimated rating, without labels 
+exports['test Model#rankAllItems|withoutLabels'] = function(beforeExit, assert){
+    var inputMatrix = [ [ 1, 2, 3, 0 ],
+                        [ 4, 0, 5, 6 ],
+                        [ 7, 8, 0, 9 ]
+                      ];
+    var estimatedMatrix = [ [ 1, 2, 3, 0.5 ],
+                        	[ 4, 0.5, 5, 6 ],
+                        	[ 7, 8, 0.5, 9 ]
+                      	];      
+                      	
+    var model = new Recommender.Model($M(inputMatrix));
+    model.estimated = $M(estimatedMatrix);        
+    
+    var rowTwoArray = model.rankAllItems(2);
+    
+    assert.equal(4, rowTwoArray.length);     
+    assert.equal(3, rowTwoArray[0][0]);  
+    assert.equal(1, rowTwoArray[1][0]);       
+    assert.equal(0, rowTwoArray[2][0]);       
+    assert.equal(2, rowTwoArray[3][0]);            
+};
+
+// Test the Model object's ability to return only recommended items with labels provided
+exports['test Model#recommendations|withLabels'] = function(beforeExit, assert){
+    var rowLabels = ['John', 'Sue', 'Joe'];
+    var colLabels = ['Red', 'Blue', 'Green', 'Purple', 'Brown', 'Black', 'White', 'Gray'];
+    var inputMatrix = [ [ 1, 2, 3, 0, 2, 5, 0, 1 ],
+                        [ 4, 0, 5, 6, 3, 1, 0, 0 ],
+                        [ 7, 8, 0, 9, 0, 2, 0, 2 ]
+                      ];
+    var estimatedMatrix = [ [ 1, 2, 3, 0.5, 2, 5, 0.9, 1 ],
+							[ 4, 0.2, 5, 6, 3, 1, 0.8, 0.1 ],
+							[ 7, 8, 0.4, 9, 0.5, 2, 0.2, 2 ]
+						  ];     
+                      	
+    var model = new Recommender.Model($M(inputMatrix), rowLabels, colLabels);
+    model.estimated = $M(estimatedMatrix);        
+    
+    var rowTwoArray = model.recommendations('Joe');
+
+    assert.equal(3, rowTwoArray.length);     
+    assert.equal('Brown', rowTwoArray[0][0]);  
+    assert.equal('Green', rowTwoArray[1][0]);       
+    assert.equal('White', rowTwoArray[2][0]);             
+};
+
+
+// Test the Model object's ability to return only recommended items without labels provided
+exports['test Model#recommendations|withoutLabels'] = function(beforeExit, assert){
+    var inputMatrix = [ [ 1, 2, 3, 0, 2, 5, 0, 1 ],
+                        [ 4, 0, 5, 6, 3, 1, 0, 0 ],
+                        [ 7, 8, 0, 9, 0, 2, 0, 2 ]
+                      ];
+    var estimatedMatrix = [ [ 1, 2, 3, 0.5, 2, 5, 0.9, 1 ],
+							[ 4, 0.2, 5, 6, 3, 1, 0.8, 0.1 ],
+							[ 7, 8, 0.4, 9, 0.5, 2, 0.2, 2 ]
+						  ];     
+                      	
+    var model = new Recommender.Model($M(inputMatrix));
+    model.estimated = $M(estimatedMatrix);        
+    
+    var rowTwoArray = model.recommendations(1);
+    
+    assert.equal(3, rowTwoArray.length);     
+    assert.equal(6, rowTwoArray[0][0]);  
+    assert.equal(1, rowTwoArray[1][0]);       
+    assert.equal(7, rowTwoArray[2][0]);             
 };
