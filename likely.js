@@ -9,7 +9,7 @@ var sylvester = require('sylvester');
 var DESCENT_STEPS = 5000; // number of iterations to execute gradient descent 
 var ALPHA = 0.0005;       // learning rate, should be small
 var BETA = 0.0007;        // regularization factor, should be small
-var k = 2; 				  // number of features to simulate
+var k = 5; 				  // number of features to simulate
 var MAX_ERROR = 0.0005;	  // threshold which, if reached, will stop descent automatically
 
 // Builds a complete model from the input array 
@@ -108,8 +108,9 @@ function calculateError(estimated, input)
 }
 
 // Computes the total error based on a matrix of error values
-function calculateTotalError(errorMatrix)
+function calculateTotalError(estimated, input)
 {
+	var errorMatrix = calculateError(estimated, input);
 	var totError = 0.0;
 	for(var i = 1; i <= errorMatrix.rows(); i++)
 	{

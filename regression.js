@@ -6,7 +6,7 @@ var Recommender = require('./likely.js');
 
 // TODO: lower the maximum error threshold
 // Note that this is the squared error
-var MAXIMUM_ERROR = 4;
+var MAXIMUM_ERROR = 1;
 
 var input = $M([
 				[1, 0, 3, 1, 0],
@@ -18,16 +18,16 @@ var input = $M([
 console.log('Input Matrix: ');
 prettyPrint(input);
 
-console.log('Estimated Matrix: ');
+console.log('\nEstimated Matrix: ');
 var estimate = Recommender.train(input);
 prettyPrint(estimate);
 
-console.log('Error Matrix: ');
+console.log('\nError Matrix: ');
 var errorMatrix = Recommender.calculateError(estimate, input);
 prettyPrint(errorMatrix);
 
-console.log('Total Error: ');
-var error = Recommender.calculateTotalError(errorMatrix);
+console.log('\nTotal Error: ');
+var error = Recommender.calculateTotalError(estimate, input);
 console.log(error);
 
 console.log('\n');
