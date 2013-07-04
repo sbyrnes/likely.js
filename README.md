@@ -13,6 +13,11 @@ For example, you may provide as input a training matrix where each row is a cust
 to various movies. Then you might use this model to get recommendations for movies a given customer might like that they have
 not yet seen.
 
+Installation
+---------
+
+    npm install likely
+
 Usage 
 ---------
     
@@ -130,11 +135,15 @@ Running the unit tests:
 
 Running the regression test:
 
-    node regression.js
+    node regression_test.js
     
 Note that the unit test requires you have installed the expresso testing framework which can be done easily:
 
     npm install expresso
+
+Or install the npm with the -dev flag
+
+    npm install -dev likely
 
 How it works
 ---------
