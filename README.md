@@ -4,7 +4,7 @@ A javascript library for collaborative filtering and recommendation engines desi
 
 Description
 ---------
-Likely.js is a library used for collaborative filtering and making recommendation. It takes an input
+Likely.js is a library used for collaborative filtering and making recommendations. It takes an input
 training matrix where the rows represent users and the columns represent items. Each entry in the matrix
 is the rating the user has given to that item. After training, you can retrieve a list of recommended
 items and their estimated ratings for any given user. 
