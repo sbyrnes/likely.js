@@ -12,7 +12,13 @@ var BETA = 0.0007;        // regularization factor, should be small
 var k = 5; 				  // number of features to simulate
 var MAX_ERROR = 0.0005;	  // threshold which, if reached, will stop descent automatically
 
-// Builds a complete model from the input array 
+/** Builds a complete model from the input array 
+ *
+ * @param inputArray A two dimensional array of the input, where each cell is the rating given to Col by Row
+ * @param [optional] rowLabels A one dimensional array of string labels for each row of inputArray
+ * @param [optional] colLabels A one dimensional array of string labels for each column of inputArray
+ * @returns Model An instance of a Model object
+ */
 function buildModel(inputArray, rowLabels, colLabels)
 {
 	var model = new Model($M(inputArray), rowLabels, colLabels);
@@ -21,31 +27,35 @@ function buildModel(inputArray, rowLabels, colLabels)
 	return model
 }
 
-// Trains the model on the given input by composing two matrices P and Q which
-// approximate the input through their product. 
-// RETURNS: A model entity, with estimated values based on the input
+/** 
+ * Trains the model on the given input by composing two matrices P and Q which
+ * approximate the input through their product. 
+ * @param inputMatrix A two dimensional array representing input values
+ * @returns Model A model entity, with estimated values based on the input
+ */
 function train(inputMatrix)
 {
-  // Generate random P and Q based on the dimensions of inputMatrix
   N = inputMatrix.rows();    // number of rows 
   M = inputMatrix.cols(); // number of columns
   
+  // Generate random P and Q based on the dimensions of inputMatrix
   var P_model = generateRandomMatrix(N, k);
   var Q_model = generateRandomMatrix(k, M);
   
   for(var i = 0; i < DESCENT_STEPS; i++)
   {
   	//console.log('------------------ Iteration --------------------');
-    // determine error
+    // Calculate error
     var error = calculateError(P_model.x(Q_model), inputMatrix);
 
 	P_prime = P_model.elements;
 	Q_prime = Q_model.elements;
 	
+	// For debugging
 	//console.log('P: ' + JSON.stringify(P_prime));
 	//console.log('Q: ' + JSON.stringify(Q_prime));
 	
-	// update P and Q accordingly
+	// Update P and Q to reduce error
     for (var row = 0; row < N; row++)
     {
     	for (var col = 0; col < M; col++)
@@ -80,7 +90,6 @@ function train(inputMatrix)
     
     // if we've already reached the error threshold, no need to descend further
     var totError = calculateTotalError(error);
-    //console.log('total error: ' + totError);
     if(totError < MAX_ERROR)
     {
     	console.log('short circuiting');
@@ -92,28 +101,45 @@ function train(inputMatrix)
   return P_model.x(Q_model); 
 }
 
-// Generates a random Matrix of size rows x columns
-// TODO: Adjust the range of generated random values
+/**
+ * Generates a random Matrix of size rows x columns.
+ * @param rows Number of rows in the random matrix
+ * @param columns Number of columns in the random matrix
+ * @returns Matrix A matrix of size rows x columns filled with random values.
+ */
 function generateRandomMatrix(rows, columns)
 {
 	return sylvester.Matrix.Random(rows, columns);
 }
 
-// Computes the error from model matrices P and Q against the given input. 
-// Result is a matrix of size input.rows by input.columns
+/**
+ * Computes the error from model matrices P and Q against the given input. 
+ * @param estimated A matrix of the estimated values.
+ * @param input A matrix of the input values
+ * @returns A matrix of size input.rows by input.columns where each entry is the difference between the input and estimated values.
+ */
 function calculateError(estimated, input)
 { 	
 	// Error is (R - R')
 	return input.subtract(estimated);
 }
 
-// Computes the total error based on a matrix of error values
+/**
+ * Computes the total error based on a matrix of error values.
+ * @param estimated A matrix of the estimated values.
+ * @param input A matrix of the input values
+ * @returns float Total error, defined as the sum of the squared difference between the estimated and input values. 
+ */
 function calculateTotalError(estimated, input)
 {
 	return calculateTotalError(calculateError(estimated, input));
 }
 
-// Computes the total error based on a matrix of error values
+/**
+ * Computes the total error based on a matrix of error values.
+ * @param errorMatrix A matrix of the error values.
+ * @returns float Total error, defined as the sum of the squared errors. 
+ */
 function calculateTotalError(errorMatrix)
 {
 	var totError = 0.0;
@@ -128,15 +154,23 @@ function calculateTotalError(errorMatrix)
 	return totError;
 }
 
-// Model representation object
+/**
+ * Model representation object. Contains both input and estimated values.
+ */
 function Model(inputMatrix, rowLabels, colLabels) {
 	this.rowLabels = rowLabels;	// labels for the rows
 	this.colLabels = colLabels; // labels for the columns
 	this.input = inputMatrix;	// input data
+	
+	// estimated data, initialized to all zeros
 	this.estimated = sylvester.Matrix.Zeros(this.input.rows(),this.input.cols());
 }
 Model.prototype = {
-	// Returns all items for a given row, sorted by rating.
+	/**
+	 * Returns all items for a given row, sorted by rating.
+	 * @param row The row to return values for
+	 * @returns Array An array of arrays, each containing two entries. [0] is the index and [1] is the value, sorted by value.
+	 */
 	rankAllItems: function(row)
 	{
 		var rowIndex = row; // assume row is a number
@@ -167,7 +201,11 @@ Model.prototype = {
 		return outputArray.sort(function(a, b) {return a[1] < b[1]})
 	},
 	
-	// Returns all items for the given row where there was no input value, sorted by rating.
+	/**
+	 * Returns all items for the given row where there was no input value, sorted by rating.
+	 * @param row The row to return values for
+	 * @returns Array An array of arrays, each containing two entries. [0] is the index and [1] is the value, sorted by value. 
+	 */
 	recommendations: function(row)
 	{
 		var recommendedItems = new Array();
@@ -203,7 +241,12 @@ Model.prototype = {
 	}	
 }
 
-// Finds the specified value in the array and returns the index. Returns -1 if not found.
+/**
+ * Finds the specified value in the array and returns the index. Returns -1 if not found.
+ * @param array The array to look for the value within
+ * @param value The value to look for
+ * @returns int Index of the value in the array. -1 if not found.
+ */
 function findInArray(array, value)
 {
 	var index = -1;
