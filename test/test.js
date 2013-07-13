@@ -68,6 +68,9 @@ exports['test calculateAverage#row'] = function(beforeExit, assert){
 	
 	var result = Recommender.calculateRowAverage(input);
 	assert.equal(3, result.dimensions().cols);
+	assert.equal(2, result.e(1));
+	assert.equal(2, result.e(2));
+	assert.equal(2, result.e(2));
 	
 	input = $M([ [ 1, 2, 3, 0 ],
 			     [ 4, 0, 5, 6 ],
@@ -75,6 +78,9 @@ exports['test calculateAverage#row'] = function(beforeExit, assert){
 		       ]);
 	result = Recommender.calculateRowAverage(input);
 	assert.equal(3, result.dimensions().cols);
+	assert.equal(1.5, result.e(1));
+	assert.equal(3.75, result.e(2));
+	assert.equal(6, result.e(3));
 };
 
 // Test calculating column average
@@ -82,6 +88,8 @@ exports['test calculateAverage#column'] = function(beforeExit, assert){
 	var input = $M([[2, 2],[2, 2],[2, 2]]);
 	var result = Recommender.calculateColumnAverage(input);
 	assert.equal(2, result.dimensions().cols);
+	assert.equal(2, result.e(1));
+	assert.equal(2, result.e(2));
 	
 	input = $M([ [ 1, 2, 3, 0 ],
 			     [ 4, 0, 5, 6 ],
@@ -89,6 +97,41 @@ exports['test calculateAverage#column'] = function(beforeExit, assert){
 		       ]);
 	result = Recommender.calculateColumnAverage(input);
 	assert.equal(4, result.dimensions().cols);
+	assert.equal(4, result.e(1));
+	assert.equal(3.33, result.e(2).toFixed(2));
+	assert.equal(2.67, result.e(3).toFixed(2));
+	assert.equal(5, result.e(4));
+};
+
+// Test calculating matrix bias
+exports['test calculateBias#matrix'] = function(beforeExit, assert){
+	var input = $M([[2, 2],[2, 2],[2, 2]]);
+	
+	var bias = Recommender.calculateBias(input)
+	assert.equal(2, bias.average);
+	assert.equal(3, bias.rowBiases.dimensions().cols);
+	assert.equal(0, bias.rowBiases.e(1));
+	assert.equal(0, bias.rowBiases.e(2));
+	assert.equal(0, bias.rowBiases.e(3));
+	assert.equal(2, bias.colBiases.dimensions().cols);
+	assert.equal(0, bias.colBiases.e(1));
+	assert.equal(0, bias.colBiases.e(2));
+	
+	input = $M([ [ 1, 2, 3, 0 ],
+			     [ 4, 0, 5, 6 ],
+			     [ 7, 8, 0, 9 ]
+		       ]);
+	bias = Recommender.calculateBias(input)
+	assert.equal(3.75, bias.average);
+	assert.equal(3, bias.rowBiases.dimensions().cols);
+	assert.equal(-2.25, bias.rowBiases.e(1));
+	assert.equal(0, bias.rowBiases.e(2));
+	assert.equal(2.25, bias.rowBiases.e(3));
+	assert.equal(4, bias.colBiases.dimensions().cols);
+	assert.equal(0.25, bias.colBiases.e(1));
+	assert.equal(-0.42, bias.colBiases.e(2).toFixed(2));
+	assert.equal(-1.08, bias.colBiases.e(3).toFixed(2));
+	assert.equal(1.25, bias.colBiases.e(4));
 };
 
 // Test the Model object's ability to return all items sorted by rating, with labels provided

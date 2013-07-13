@@ -155,6 +155,46 @@ function calculateTotalError(errorMatrix)
 }
 
 /**
+ * Computes the biases from a matrix of values. 
+ * @param input A matrix of the input values
+ * @returns Bias Object containing the average, bias for rows and bias for columns.
+ */
+function calculateBias(inputMatrix)
+{
+	var average = calculateMatrixAverage(inputMatrix);
+	var rowAverages = calculateRowAverage(inputMatrix);
+	var colAverages = calculateColumnAverage(inputMatrix);
+	
+	var rowBiases = new Array();
+	var colBiases = new Array();
+	
+	// The row bias is the difference between the row average and the overall average
+	for(var i = 1; i <= rowAverages.dimensions().cols; i++)
+	{
+		rowBiases[i-1] = rowAverages.e(i) - average;
+	}
+	
+	// the column bias is the difference between the column average and the overall average
+	for(var i = 1; i <= colAverages.dimensions().cols; i++)
+	{
+		colBiases[i-1] = colAverages.e(i) - average;
+	}
+	
+	var biases = new Bias(average, $V(rowBiases), $V(colBiases));
+	
+	return biases;
+}
+
+/**
+ * Bias representation object. Contains all bias elements.
+ */
+function Bias(average, rowBiases, colBiases) {
+	this.average = average;		// Overall value average
+	this.rowBiases = rowBiases; // Bias for each row
+	this.colBiases = colBiases;	// Bias for each column
+}
+
+/**
  * Computes the overall average value from a matrix of values. 
  * @param input A matrix of the input values
  * @returns float Average value.
@@ -190,7 +230,7 @@ function calculateColumnAverage(inputMatrix)
 		var sum = 0;
 		for(var j = 1; j <= inputMatrix.rows(); j++)
 		{
-			sum += inputMatrix.e(i, j);
+			sum += inputMatrix.e(j, i);
 		}
 		averages[i-1] = sum/rows;
 	}
@@ -333,9 +373,11 @@ module.exports.train = train;
 module.exports.generateRandomMatrix = generateRandomMatrix;
 module.exports.calculateError = calculateError;
 module.exports.calculateTotalError = calculateTotalError;
+module.exports.calculateBias = calculateBias;
 module.exports.calculateMatrixAverage = calculateMatrixAverage;
 module.exports.calculateColumnAverage = calculateColumnAverage;
 module.exports.calculateRowAverage = calculateRowAverage;
 
+module.exports.Bias = Bias;
 module.exports.Model = Model;
 
