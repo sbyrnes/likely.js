@@ -155,6 +155,73 @@ function calculateTotalError(errorMatrix)
 }
 
 /**
+ * Computes the overall average value from a matrix of values. 
+ * @param input A matrix of the input values
+ * @returns float Average value.
+ */
+function calculateMatrixAverage(inputMatrix)
+{
+	var cells = inputMatrix.rows() * inputMatrix.cols();
+	
+	var sum = 0;
+	for(var i = 1; i <= inputMatrix.rows(); i++)
+	{
+		for(var j = 1; j <= inputMatrix.cols(); j++)
+		{
+			sum += inputMatrix.e(i, j);
+		}
+	}
+	
+	return sum/cells;
+}
+
+/**
+ * Computes the average value for each column of a matrix of values. 
+ * @param input A matrix of the input values
+ * @returns Vector Average value for each column. Vector[i] is the average for column i.
+ */
+function calculateColumnAverage(inputMatrix)
+{
+	var rows = inputMatrix.rows();
+	
+	var averages = new Array();
+	for(var i = 1; i <= inputMatrix.cols(); i++)
+	{
+		var sum = 0;
+		for(var j = 1; j <= inputMatrix.rows(); j++)
+		{
+			sum += inputMatrix.e(i, j);
+		}
+		averages[i-1] = sum/rows;
+	}
+	
+	return $V(averages);
+}
+
+/**
+ * Computes the average value for each row of a matrix of values. 
+ * @param input A matrix of the input values
+ * @returns Vector Average value for each row. Vector[i] is the average for row i.
+ */
+function calculateRowAverage(inputMatrix)
+{
+	var cols = inputMatrix.cols();
+	
+	var averages = new Array();
+	for(var i = 1; i <= inputMatrix.rows(); i++)
+	{
+		var sum = 0;
+		for(var j = 1; j <= inputMatrix.cols(); j++)
+		{
+			sum += inputMatrix.e(i, j);
+		}
+		averages[i-1] = sum/cols;
+	}
+	
+	return $V(averages);
+}
+
+/**
  * Model representation object. Contains both input and estimated values.
  */
 function Model(inputMatrix, rowLabels, colLabels) {
@@ -266,5 +333,9 @@ module.exports.train = train;
 module.exports.generateRandomMatrix = generateRandomMatrix;
 module.exports.calculateError = calculateError;
 module.exports.calculateTotalError = calculateTotalError;
+module.exports.calculateMatrixAverage = calculateMatrixAverage;
+module.exports.calculateColumnAverage = calculateColumnAverage;
+module.exports.calculateRowAverage = calculateRowAverage;
+
 module.exports.Model = Model;
 

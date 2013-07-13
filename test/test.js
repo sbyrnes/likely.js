@@ -48,6 +48,49 @@ exports['test calculateTotalError#values'] = function(beforeExit, assert){
 	assert.equal(10.25, Recommender.calculateTotalError(error));
 };
 
+// Test calculating matrix average
+exports['test calculateAverage#matrix'] = function(beforeExit, assert){
+	var input = $M([[2, 2],[2, 2],[2, 2]]);
+	
+	assert.equal(2, Recommender.calculateMatrixAverage(input));
+	
+	input = $M([ [ 1, 2, 3, 0 ],
+			     [ 4, 0, 5, 6 ],
+			     [ 7, 8, 0, 9 ]
+		       ]);
+	
+	assert.equal(3.75, Recommender.calculateMatrixAverage(input));
+};
+
+// Test calculating row average
+exports['test calculateAverage#row'] = function(beforeExit, assert){
+	var input = $M([[2, 2],[2, 2],[2, 2]]);
+	
+	var result = Recommender.calculateRowAverage(input);
+	assert.equal(3, result.dimensions().cols);
+	
+	input = $M([ [ 1, 2, 3, 0 ],
+			     [ 4, 0, 5, 6 ],
+			     [ 7, 8, 0, 9 ]
+		       ]);
+	result = Recommender.calculateRowAverage(input);
+	assert.equal(3, result.dimensions().cols);
+};
+
+// Test calculating column average
+exports['test calculateAverage#column'] = function(beforeExit, assert){
+	var input = $M([[2, 2],[2, 2],[2, 2]]);
+	var result = Recommender.calculateColumnAverage(input);
+	assert.equal(2, result.dimensions().cols);
+	
+	input = $M([ [ 1, 2, 3, 0 ],
+			     [ 4, 0, 5, 6 ],
+			     [ 7, 8, 0, 9 ]
+		       ]);
+	result = Recommender.calculateColumnAverage(input);
+	assert.equal(4, result.dimensions().cols);
+};
+
 // Test the Model object's ability to return all items sorted by rating, with labels provided
 exports['test Model#rankAllItems|withLabels'] = function(beforeExit, assert){
     var rowLabels = ['John', 'Sue', 'Joe'];
