@@ -228,3 +228,21 @@ exports['test Model#recommendations|withoutLabels'] = function(beforeExit, asser
     assert.equal(1, rowTwoArray[1][0]);       
     assert.equal(7, rowTwoArray[2][0]);             
 };
+
+// Test setting constants
+exports['test Constants#values'] = function(beforeExit, assert){
+	assert.equal(5000, Recommender.DESCENT_STEPS);
+	
+	Recommender.DESCENT_STEPS = 5500;
+	
+	assert.equal(5500, Recommender.DESCENT_STEPS);
+	
+	Recommender.DESCENT_STEPS = 5000;
+	
+	assert.isDefined(Recommender.DESCENT_STEPS);
+	assert.isDefined(Recommender.ALPHA);
+	assert.isDefined(Recommender.BETA);
+	assert.isDefined(Recommender.K);
+	assert.isDefined(Recommender.MAX_ERROR);
+}
+

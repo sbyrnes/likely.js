@@ -9,7 +9,7 @@ var sylvester = require('sylvester');
 var DESCENT_STEPS = 5000; // number of iterations to execute gradient descent 
 var ALPHA = 0.0005;       // learning rate, should be small
 var BETA = 0.0007;        // regularization factor, should be small
-var k = 5; 				  // number of features to simulate
+var K = 5; 				  // number of features to simulate
 var MAX_ERROR = 0.0005;	  // threshold which, if reached, will stop descent automatically
 
 /** Builds a complete model from the input array 
@@ -33,20 +33,20 @@ function buildModel(inputArray, rowLabels, colLabels)
  * @param inputMatrix A two dimensional array representing input values
  * @returns Model A model entity, with estimated values based on the input
  */
-function train(inputMatrix)
+function train(inputMatrix, bias)
 {
   N = inputMatrix.rows();    // number of rows 
   M = inputMatrix.cols(); // number of columns
   
   // Generate random P and Q based on the dimensions of inputMatrix
-  var P_model = generateRandomMatrix(N, k);
-  var Q_model = generateRandomMatrix(k, M);
+  var P_model = generateRandomMatrix(N, K);
+  var Q_model = generateRandomMatrix(K, M);
   
   for(var i = 0; i < DESCENT_STEPS; i++)
   {
   	//console.log('------------------ Iteration --------------------');
     // Calculate error
-    var error = calculateError(P_model.x(Q_model), inputMatrix);
+    var error = calculateError(P_model.x(Q_model), inputMatrix, bias);
 
 	P_prime = P_model.elements;
 	Q_prime = Q_model.elements;
@@ -60,7 +60,7 @@ function train(inputMatrix)
     {
     	for (var col = 0; col < M; col++)
     	{
-    		for(var feature = 0; feature < k; feature++)
+    		for(var feature = 0; feature < K; feature++)
     		{
     			// update formulas will change values in the opposite direction of the gradient.
     			
@@ -118,10 +118,22 @@ function generateRandomMatrix(rows, columns)
  * @param input A matrix of the input values
  * @returns A matrix of size input.rows by input.columns where each entry is the difference between the input and estimated values.
  */
-function calculateError(estimated, input)
+function calculateError(estimated, input, bias)
 { 	
+	var adjustedInput = input.dup();
+	
+	// If bias adjustment is provided, adjust for it
+	if(bias)
+	{
+		// adjustedInput.subtract(bias.average); // subtract the overall average from all entries
+		
+		// subtract the row bias from each row
+		
+		// subtract the column bias from each column
+	}
+
 	// Error is (R - R')
-	return input.subtract(estimated);
+	return adjustedInput.subtract(estimated);
 }
 
 /**
@@ -377,6 +389,12 @@ module.exports.calculateBias = calculateBias;
 module.exports.calculateMatrixAverage = calculateMatrixAverage;
 module.exports.calculateColumnAverage = calculateColumnAverage;
 module.exports.calculateRowAverage = calculateRowAverage;
+
+module.exports.DESCENT_STEPS = DESCENT_STEPS;
+module.exports.ALPHA = ALPHA;
+module.exports.BETA = BETA;
+module.exports.K = K;
+module.exports.MAX_ERROR = MAX_ERROR;
 
 module.exports.Bias = Bias;
 module.exports.Model = Model;

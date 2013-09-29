@@ -22,21 +22,21 @@ Usage
 ---------
     
 To use Likely, require the likely module and follow the 3 steps below.
-
+<!-- language: lang-js -->
     var Recommender = require('likely');
     
 #### STEP 1. Assemble the input
 Create an input matrix where rows are users and the columns are items
 A cell represents the rating of that item by the entity. inputMatrix[0][1] is the 
 rating of item 1 by user 0
-
+<!-- language: lang-js -->
     var inputMatrix = [ [ 1, 2, 3, 0 ],
                         [ 4, 0, 5, 6 ],
                         [ 7, 8, 0, 9 ]
                       ];
                       
 Labels to provide more context to the input. Row 0 of the input matrix corresponds to label rowLabels[0]
-
+<!-- language: lang-js -->
     var rowLabels = ['John', 'Sue', 'Joe'];
     var colLabels = ['Red', 'Blue', 'Green', 'Purple'];
 
@@ -44,11 +44,11 @@ Using these values, John rates Red 1 while Joe rates Red 7. Sue has no rating fo
 
 #### STEP 2. Train the model
 Using the inputMatrix you build a model, which estimates the ratings for all entities for all users. 
-
+<!-- language: lang-js -->
     var Model = Recommender.buildModel(inputMatrix, rowLabels, colLabels);
     
 or, if you don't have or care about labels
-    
+<!-- language: lang-js -->
     var Model = Recommender.buildModel(inputMatrix);
     
 The Model object now contains a matrix of the same size as inputMatrix but with estimates ratings for
@@ -58,26 +58,26 @@ all items for all entities.
 There are a few ways to retrieve recommendations from the model you have built.
 
 **Example 1**: Retrieve a list of all items not already rated by a user, sorted by estimated ratings using labels.
-
+<!-- language: lang-js -->
     var recommendations = model.recommendations('John');
 	
     // recommendations = [['Purple', 1.34]];
     
 
 **Example 2**: Retrieve a list of all items not already rated by a user, sorted by estimated ratings without labels.
-
+<!-- language: lang-js -->
     var recommendations = model.recommendations(0);
 	
     // recommendations = [[3, 1.34]];
 
 **Example 3**: Retrieve a list of all items, sorted by the ratings for a given user (both estimated and actual), using labels.
-	
+<!-- language: lang-js -->
     var allItems = model.rankAllItems('John');
 	
     // allItems = [['Green', 3.00], ['Blue', 2.00], ['Purple', 1.34], ['Red', 1.00]];
 
 **Example 4**: Retrieve a list of all items, sorted by the ratings for a given user (both estimated and actual) without labels.
-	
+<!-- language: lang-js -->	
     var allItems = model.rankAllItems(0);
 	
     // allItems = [[2, 3.00], [1, 2.00], [3, 1.34], [0, 1.00]];
@@ -92,7 +92,7 @@ should train the model using your training set and check the error using the CV 
 the model built using the training set to your entire data and have confidence in the estimates. 
 
 In practice, this would look as follows:
-
+<!-- language: lang-js -->
     var Recommender = require('likely.js');
 
     // Build the model using the training set
@@ -106,7 +106,7 @@ In practice, this would look as follows:
 
 This is common for any machine learning application. In this case it will be necessary to tune the parameters of the 
 Likely.js learning algorithm to better fit your data. The available options that you can adjust are as follows:
-	
+<!-- language: lang-js -->	
 	var Recommender = require('likely.js');
 	
 	// Number of iterations it will use to try and learn the model, the larger the better. 
