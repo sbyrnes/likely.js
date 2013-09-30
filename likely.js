@@ -21,8 +21,21 @@ var MAX_ERROR = 0.0005;	  // threshold which, if reached, will stop descent auto
  */
 function buildModel(inputArray, rowLabels, colLabels)
 {
+	return buildModelWithBias(inputArray, undefined, rowLabels, colLabels);
+}
+
+/** Builds a complete model from the input array with bias
+ *
+ * @param inputArray A two dimensional array of the input, where each cell is the rating given to Col by Row
+ * @param bias A two dimensional matrix of the bias of the inputArray
+ * @param [optional] rowLabels A one dimensional array of string labels for each row of inputArray
+ * @param [optional] colLabels A one dimensional array of string labels for each column of inputArray
+ * @returns Model An instance of a Model object
+ */
+function buildModelWithBias(inputArray, bias, rowLabels, colLabels)
+{
 	var model = new Model($M(inputArray), rowLabels, colLabels);
-	model.estimated = train(sylvester.Matrix.create(inputArray));
+	model.estimated = train(sylvester.Matrix.create(inputArray), bias);
 	
 	return model
 }
@@ -92,13 +105,42 @@ function train(inputMatrix, bias)
     var totError = calculateTotalError(error);
     if(totError < MAX_ERROR)
     {
-    	console.log('short circuiting');
+    	//console.log('Reached error threshold early, no more descent needed.');
 	    break;
     }
   }
   
   // produce the final estimation by multiplying P and Q
-  return P_model.x(Q_model); 
+  var finalModel = P_model.x(Q_model); 
+  
+  // if we were considering bias, we have to add it back in
+  if(bias)
+  {
+  		// add back the overall average
+  		finalModel = finalModel.map(function(x) { return x + bias.average; });
+  	
+		var finalElements = finalModel.elements;
+		
+		// add back the row bias from each row
+		for(var i = 1; i <= finalModel.rows(); i++)
+		{
+			for(var j = 1; j <= finalModel.cols(); j++)
+			{
+				finalElements[i-1][j-1] += bias.rowBiases.e(i);
+			}
+		}
+		
+		// add back the column bias from each column
+		for(var i = 1; i <= finalModel.rows(); i++)
+		{
+			for(var j = 1; j <= finalModel.cols(); j++)
+			{
+				finalElements[i-1][j-1] += bias.colBiases.e(j);
+			}
+		}
+  }
+  
+  return finalModel;
 }
 
 /**
@@ -125,11 +167,27 @@ function calculateError(estimated, input, bias)
 	// If bias adjustment is provided, adjust for it
 	if(bias)
 	{
-		// adjustedInput.subtract(bias.average); // subtract the overall average from all entries
+		adjustedInput.map(function(x) { return x - bias.average; }); // subtract the overall average from all entries
+		
+		var adjustedElements = adjustedInput.elements;
 		
 		// subtract the row bias from each row
+		for(var i = 1; i <= adjustedInput.rows(); i++)
+		{
+			for(var j = 1; j <= adjustedInput.cols(); j++)
+			{
+				adjustedElements[i-1][j-1] -= bias.rowBiases.e(i);
+			}
+		}
 		
 		// subtract the column bias from each column
+		for(var i = 1; i <= adjustedInput.rows(); i++)
+		{
+			for(var j = 1; j <= adjustedInput.cols(); j++)
+			{
+				adjustedElements[i-1][j-1] -= bias.colBiases.e(j);
+			}
+		}
 	}
 
 	// Error is (R - R')
@@ -381,7 +439,8 @@ function findInArray(array, value)
 	return index;
 }
 
-module.exports.train = train;
+module.exports.buildModel = buildModel;
+module.exports.buildModelWithBias = buildModelWithBias;
 module.exports.generateRandomMatrix = generateRandomMatrix;
 module.exports.calculateError = calculateError;
 module.exports.calculateTotalError = calculateTotalError;

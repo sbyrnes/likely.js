@@ -142,13 +142,8 @@ exports['test Model#rankAllItems|withLabels'] = function(beforeExit, assert){
                         [ 4, 0, 5, 6 ],
                         [ 7, 8, 0, 9 ]
                       ];
-    var estimatedMatrix = [ [ 1, 2, 3, 0.5 ],
-                        	[ 4, 0.5, 5, 6 ],
-                        	[ 7, 8, 0.5, 9 ]
-                      	];      
                       	
-    var model = new Recommender.Model($M(inputMatrix), rowLabels, colLabels);
-    model.estimated = $M(estimatedMatrix);        
+    var model = Recommender.buildModel($M(inputMatrix), rowLabels, colLabels);
     
     var sueArray = model.rankAllItems('Sue');
     
@@ -165,13 +160,8 @@ exports['test Model#rankAllItems|withoutLabels'] = function(beforeExit, assert){
                         [ 4, 0, 5, 6 ],
                         [ 7, 8, 0, 9 ]
                       ];
-    var estimatedMatrix = [ [ 1, 2, 3, 0.5 ],
-                        	[ 4, 0.5, 5, 6 ],
-                        	[ 7, 8, 0.5, 9 ]
-                      	];      
                       	
-    var model = new Recommender.Model($M(inputMatrix));
-    model.estimated = $M(estimatedMatrix);        
+    var model = Recommender.buildModel($M(inputMatrix));
     
     var rowTwoArray = model.rankAllItems(2);
     
@@ -186,17 +176,12 @@ exports['test Model#rankAllItems|withoutLabels'] = function(beforeExit, assert){
 exports['test Model#recommendations|withLabels'] = function(beforeExit, assert){
     var rowLabels = ['John', 'Sue', 'Joe'];
     var colLabels = ['Red', 'Blue', 'Green', 'Purple', 'Brown', 'Black', 'White', 'Gray'];
-    var inputMatrix = [ [ 1, 2, 3, 0, 2, 5, 0, 1 ],
-                        [ 4, 0, 5, 6, 3, 1, 0, 0 ],
-                        [ 7, 8, 0, 9, 0, 2, 0, 2 ]
+    var inputMatrix = [ [ 1, 9, 3, 0, 9, 5, 0, 1 ],
+                        [ 4, 0, 5, 6, 9, 1, 0, 0 ],
+                        [ 7, 4, 0, 9, 0, 2, 0, 2 ]
                       ];
-    var estimatedMatrix = [ [ 1, 2, 3, 0.5, 2, 5, 0.9, 1 ],
-							[ 4, 0.2, 5, 6, 3, 1, 0.8, 0.1 ],
-							[ 7, 8, 0.4, 9, 0.5, 2, 0.2, 2 ]
-						  ];     
                       	
-    var model = new Recommender.Model($M(inputMatrix), rowLabels, colLabels);
-    model.estimated = $M(estimatedMatrix);        
+    var model = Recommender.buildModelWithBias($M(inputMatrix), rowLabels, colLabels);
     
     var rowTwoArray = model.recommendations('Joe');
 
@@ -213,20 +198,36 @@ exports['test Model#recommendations|withoutLabels'] = function(beforeExit, asser
                         [ 4, 0, 5, 6, 3, 1, 0, 0 ],
                         [ 7, 8, 0, 9, 0, 2, 0, 2 ]
                       ];
-    var estimatedMatrix = [ [ 1, 2, 3, 0.5, 2, 5, 0.9, 1 ],
-							[ 4, 0.2, 5, 6, 3, 1, 0.8, 0.1 ],
-							[ 7, 8, 0.4, 9, 0.5, 2, 0.2, 2 ]
-						  ];     
                       	
-    var model = new Recommender.Model($M(inputMatrix));
-    model.estimated = $M(estimatedMatrix);        
+    var model = Recommender.buildModel($M(inputMatrix));
     
     var rowTwoArray = model.recommendations(1);
     
     assert.equal(3, rowTwoArray.length);     
-    assert.equal(6, rowTwoArray[0][0]);  
+    assert.equal(1, rowTwoArray[0][0]);  
+    assert.equal(7, rowTwoArray[1][0]);       
+    assert.equal(6, rowTwoArray[2][0]);             
+};
+
+
+
+// Test the Model object's ability to return all items sorted by estimated rating, without labels 
+exports['test Model#rankAllItems|withBias|withoutLabels'] = function(beforeExit, assert){
+    var inputMatrix = [ [ 1, 2, 3, 0 ],
+                        [ 4, 0, 5, 6 ],
+                        [ 7, 8, 0, 9 ]
+                      ];  
+                      	
+    var bias = Recommender.calculateBias($M(inputMatrix));
+    var model = Recommender.buildModelWithBias($M(inputMatrix), bias);
+    
+    var rowTwoArray = model.rankAllItems(2);
+    
+    assert.equal(4, rowTwoArray.length);     
+    assert.equal(3, rowTwoArray[0][0]);  
     assert.equal(1, rowTwoArray[1][0]);       
-    assert.equal(7, rowTwoArray[2][0]);             
+    assert.equal(0, rowTwoArray[2][0]);       
+    assert.equal(2, rowTwoArray[3][0]);            
 };
 
 // Test setting constants

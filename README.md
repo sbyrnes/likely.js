@@ -82,6 +82,20 @@ There are a few ways to retrieve recommendations from the model you have built.
 	
     // allItems = [[2, 3.00], [1, 2.00], [3, 1.34], [0, 1.00]];
 
+
+Handling Bias 
+---------
+In a lot of input data there is inherent bias. For example, a given user might tend to rate a great movie as 10 stars which another user never gives above 8 stars. 
+These inherent biases can skew the estimations by providing false signals to the model. To handle these, you can adjust for biases by including them in your model 
+building. 
+<!-- language: lang-js -->	
+	var bias = Recommender.calculateBias(input);
+	
+    // Build the model using the training set and considering the bias
+    var model = Recommender.buildModelWithBias(trainingSet, bias);
+	
+The resulting model should be very similar to the one obtained without providing bias, but more accurate. 
+
 FAQ
 ---------
 #### I used Likely.js to generate recommendations based on my data. How do I know if it's working?
@@ -124,6 +138,14 @@ Likely.js learning algorithm to better fit your data. The available options that
 	// The number of features to learn. In theory the more the better but a larger value will slow down
 	// 	the training. 
 	Recommender.k; 		    // DEFAULT = 5
+
+
+#### How is bias calculated?
+
+When you call Recommender.calculateBias(input) the Recommender computes the overall mean score and average deviation from the mean for each row and column. 
+The overall mean and row/column deviations can then be used to normalize all the data.
+
+This is a fairly simple model of bias but should improve performance in most cases. 
 
 Tests 
 ---------
