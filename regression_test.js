@@ -19,7 +19,8 @@ console.log('Input Matrix: ');
 prettyPrint(input);
 
 console.log('\nEstimated Matrix: ');
-var estimate = Recommender.train(input);
+var model = Recommender.buildModel(input);
+var estimate = model.estimated;
 prettyPrint(estimate);
 
 console.log('\nError Matrix: ');
