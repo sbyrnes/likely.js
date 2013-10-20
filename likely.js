@@ -167,11 +167,11 @@ function calculateError(estimated, input, bias)
 { 	
 	var adjustedInput = input.dup();
 	
+	var adjustedElements = adjustedInput.elements;
+		
 	// If bias adjustment is provided, adjust for it
 	if(bias)
 	{
-		var adjustedElements = adjustedInput.elements;
-		
 		// subtract the row and column bias from each row
 		for(var i = 0; i <= adjustedInput.rows()-1; i++)
 		{
@@ -187,9 +187,24 @@ function calculateError(estimated, input, bias)
 			}
 		}
 	}
+	
+	
+	var estimatedElements = estimated.elements;
+	
+	// Error is (R - R')
+	// (but we ignore error on the zero entries since they are unknown)
+	for(var i = 0; i <= adjustedInput.rows()-1; i++)
+	{
+		for(var j = 0; j <= adjustedInput.cols()-1; j++)
+		{
+			if(adjustedElements[i][j] == 0) continue; // skip zeroes
+			
+			adjustedElements[i][j] -= estimatedElements[i][j];
+		}
+	}				
 
 	// Error is (R - R')
-	return adjustedInput.subtract(estimated);
+	return adjustedInput;
 }
 
 /**
