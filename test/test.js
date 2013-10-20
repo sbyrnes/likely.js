@@ -139,7 +139,7 @@ exports['test Model#rankAllItems|withLabels'] = function(beforeExit, assert){
     var rowLabels = ['John', 'Sue', 'Joe'];
     var colLabels = ['Red', 'Blue', 'Green', 'Purple'];
     var inputMatrix = [ [ 1, 2, 3, 0 ],
-                        [ 4, 0, 5, 6 ],
+                        [ 2, 0, 5, 6 ],
                         [ 7, 8, 0, 9 ]
                       ];
                       	
@@ -156,16 +156,14 @@ exports['test Model#rankAllItems|withLabels'] = function(beforeExit, assert){
 
 // Test the Model object's ability to return all items sorted by estimated rating, without labels 
 exports['test Model#rankAllItems|withoutLabels'] = function(beforeExit, assert){
-    var inputMatrix = [ [ 1, 2, 3, 0 ],
-                        [ 4, 0, 5, 6 ],
+    var inputMatrix = [ [ 1, 2, 1, 0 ],
+                        [ 2, 0, 1, 6 ],
                         [ 7, 8, 0, 9 ]
                       ];
                       	
     var model = Recommender.buildModel($M(inputMatrix));
     
     var rowTwoArray = model.rankAllItems(2);
-    
-    console.log(rowTwoArray);
     
     assert.equal(4, rowTwoArray.length);     
     assert.equal(3, rowTwoArray[0][0]);  
@@ -198,9 +196,9 @@ exports['test Model#recommendations|withLabels'] = function(beforeExit, assert){
 
 // Test the Model object's ability to return only recommended items without labels provided
 exports['test Model#recommendations|withoutLabels'] = function(beforeExit, assert){
-    var inputMatrix = [ [ 1, 2, 3, 0, 2, 5, 0, 1 ],
+    var inputMatrix = [ [ 1, 2, 3, 0, 2, 5, 1, 3 ],
                         [ 4, 0, 5, 6, 3, 1, 0, 0 ],
-                        [ 7, 8, 0, 9, 0, 2, 0, 2 ]
+                        [ 7, 8, 0, 9, 0, 2, 0, 5 ]
                       ];
                       	
     var model = Recommender.buildModel($M(inputMatrix));
@@ -217,9 +215,9 @@ exports['test Model#recommendations|withoutLabels'] = function(beforeExit, asser
 
 // Test the Model object's ability to return all items sorted by estimated rating, without labels 
 exports['test Model#rankAllItems|withBias|withoutLabels'] = function(beforeExit, assert){
-    var inputMatrix = [ [ 1, 2, 3, 0 ],
+    var inputMatrix = [ [ 1, 2, 1, 0 ],
                         [ 4, 0, 5, 6 ],
-                        [ 7, 8, 0, 9 ]
+                        [ 5, 8, 0, 9 ]
                       ];  
                       	
     var bias = Recommender.calculateBias($M(inputMatrix));
@@ -230,8 +228,8 @@ exports['test Model#rankAllItems|withBias|withoutLabels'] = function(beforeExit,
     assert.equal(4, rowTwoArray.length);     
     assert.equal(3, rowTwoArray[0][0]);  
     assert.equal(1, rowTwoArray[1][0]);       
-    assert.equal(0, rowTwoArray[2][0]);       
-    assert.equal(2, rowTwoArray[3][0]);            
+    assert.equal(2, rowTwoArray[2][0]);       
+    assert.equal(0, rowTwoArray[3][0]);            
 };
 
 // Test setting constants
