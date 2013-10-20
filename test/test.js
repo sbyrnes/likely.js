@@ -150,8 +150,8 @@ exports['test Model#rankAllItems|withLabels'] = function(beforeExit, assert){
     assert.equal(4, sueArray.length);     
     assert.equal('Purple', sueArray[0][0]);  
     assert.equal('Green', sueArray[1][0]);       
-    assert.equal('Red', sueArray[2][0]);       
-    assert.equal('Blue', sueArray[3][0]);            
+    assert.equal('Blue', sueArray[2][0]);       
+    assert.equal('Red', sueArray[3][0]);            
 };
 
 // Test the Model object's ability to return all items sorted by estimated rating, without labels 
@@ -164,6 +164,8 @@ exports['test Model#rankAllItems|withoutLabels'] = function(beforeExit, assert){
     var model = Recommender.buildModel($M(inputMatrix));
     
     var rowTwoArray = model.rankAllItems(2);
+    
+    console.log(rowTwoArray);
     
     assert.equal(4, rowTwoArray.length);     
     assert.equal(3, rowTwoArray[0][0]);  
@@ -205,12 +207,10 @@ exports['test Model#recommendations|withoutLabels'] = function(beforeExit, asser
     
     var rowTwoArray = model.recommendations(1);
     
-    assert.equal(3, rowTwoArray.length);  
-    // The signal of the input data isn't strong enough, these are not reliable outcomes
-    // TODO: improve model building until it's accurate   
-    //assert.equal(1, rowTwoArray[0][0]);  
-    //assert.equal(7, rowTwoArray[1][0]);       
-    //assert.equal(6, rowTwoArray[2][0]);             
+    assert.equal(3, rowTwoArray.length);    
+    assert.equal(1, rowTwoArray[0][0]);  
+    assert.equal(7, rowTwoArray[1][0]);       
+    assert.equal(6, rowTwoArray[2][0]);             
 };
 
 
