@@ -43,19 +43,5 @@ console.log('\n\n');
 /** Utility to pretty print matrix contents */
 function prettyPrint(matrix)
 {	
-/**
-	for(i=1;i<matrix.rows();i++)
-	{
-		var line = '';
-	
-		for(j=1;j<matrix.cols();j++)
-		{
-			line += matrix.e(i, j).toFixed(2) + '  ';
-		}
-		
-	    console.log('\t'+ line);
-	}
-	console.log('\n');
-*/
 	console.log(matrix.inspect());
 }

@@ -55,7 +55,8 @@ function train(inputMatrix, bias)
   var P_model = generateRandomMatrix(N, K);
   var Q_model = generateRandomMatrix(K, M);
   
-  for(var i = 0; i < DESCENT_STEPS; i++)
+  var i = 0
+  for(i = 0; i < DESCENT_STEPS; i++)
   {
   	//console.log('------------------ Iteration --------------------');
     // Calculate error
@@ -109,6 +110,8 @@ function train(inputMatrix, bias)
 	    break;
     }
   }
+  
+  //console.log('Descent steps used: ' + i);
   
   // produce the final estimation by multiplying P and Q
   var finalModel = P_model.x(Q_model); 
@@ -167,25 +170,20 @@ function calculateError(estimated, input, bias)
 	// If bias adjustment is provided, adjust for it
 	if(bias)
 	{
-		adjustedInput.map(function(x) { return x - bias.average; }); // subtract the overall average from all entries
-		
 		var adjustedElements = adjustedInput.elements;
 		
-		// subtract the row bias from each row
-		for(var i = 1; i <= adjustedInput.rows(); i++)
+		// subtract the row and column bias from each row
+		for(var i = 0; i <= adjustedInput.rows()-1; i++)
 		{
-			for(var j = 1; j <= adjustedInput.cols(); j++)
+			for(var j = 0; j <= adjustedInput.cols()-1; j++)
 			{
-				adjustedElements[i-1][j-1] -= bias.rowBiases.e(i);
-			}
-		}
-		
-		// subtract the column bias from each column
-		for(var i = 1; i <= adjustedInput.rows(); i++)
-		{
-			for(var j = 1; j <= adjustedInput.cols(); j++)
-			{
-				adjustedElements[i-1][j-1] -= bias.colBiases.e(j);
+				if(adjustedElements[i][j] == 0) continue; // skip zeroes
+				
+				adjustedElements[i][j] -= bias.average;
+				
+				adjustedElements[i][j] -= bias.rowBiases.e(i+1);
+				
+				adjustedElements[i][j] -= bias.colBiases.e(j+1);
 			}
 		}
 	}
