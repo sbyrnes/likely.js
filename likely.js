@@ -9,7 +9,7 @@ var sylvester = require('sylvester');
 var DESCENT_STEPS = 5000; // number of iterations to execute gradient descent 
 var ALPHA = 0.0005;       // learning rate, should be small
 var BETA = 0.0007;        // regularization factor, should be small
-var k = 5; 				  // number of features to simulate
+var K = 5; 				  // number of features to simulate
 var MAX_ERROR = 0.0005;	  // threshold which, if reached, will stop descent automatically
 
 /** Builds a complete model from the input array 
@@ -21,8 +21,21 @@ var MAX_ERROR = 0.0005;	  // threshold which, if reached, will stop descent auto
  */
 function buildModel(inputArray, rowLabels, colLabels)
 {
+	return buildModelWithBias(inputArray, undefined, rowLabels, colLabels);
+}
+
+/** Builds a complete model from the input array with bias
+ *
+ * @param inputArray A two dimensional array of the input, where each cell is the rating given to Col by Row
+ * @param bias A two dimensional matrix of the bias of the inputArray
+ * @param [optional] rowLabels A one dimensional array of string labels for each row of inputArray
+ * @param [optional] colLabels A one dimensional array of string labels for each column of inputArray
+ * @returns Model An instance of a Model object
+ */
+function buildModelWithBias(inputArray, bias, rowLabels, colLabels)
+{
 	var model = new Model($M(inputArray), rowLabels, colLabels);
-	model.estimated = train(sylvester.Matrix.create(inputArray));
+	model.estimated = train(sylvester.Matrix.create(inputArray), bias);
 	
 	return model
 }
@@ -33,20 +46,21 @@ function buildModel(inputArray, rowLabels, colLabels)
  * @param inputMatrix A two dimensional array representing input values
  * @returns Model A model entity, with estimated values based on the input
  */
-function train(inputMatrix)
+function train(inputMatrix, bias)
 {
   N = inputMatrix.rows();    // number of rows 
   M = inputMatrix.cols(); // number of columns
   
   // Generate random P and Q based on the dimensions of inputMatrix
-  var P_model = generateRandomMatrix(N, k);
-  var Q_model = generateRandomMatrix(k, M);
+  var P_model = generateRandomMatrix(N, K);
+  var Q_model = generateRandomMatrix(K, M);
   
-  for(var i = 0; i < DESCENT_STEPS; i++)
+  var i = 0
+  for(i = 0; i < DESCENT_STEPS; i++)
   {
   	//console.log('------------------ Iteration --------------------');
     // Calculate error
-    var error = calculateError(P_model.x(Q_model), inputMatrix);
+    var error = calculateError(P_model.x(Q_model), inputMatrix, bias);
 
 	P_prime = P_model.elements;
 	Q_prime = Q_model.elements;
@@ -60,7 +74,7 @@ function train(inputMatrix)
     {
     	for (var col = 0; col < M; col++)
     	{
-    		for(var feature = 0; feature < k; feature++)
+    		for(var feature = 0; feature < K; feature++)
     		{
     			// update formulas will change values in the opposite direction of the gradient.
     			
@@ -92,13 +106,44 @@ function train(inputMatrix)
     var totError = calculateTotalError(error);
     if(totError < MAX_ERROR)
     {
-    	console.log('short circuiting');
+    	//console.log('Reached error threshold early, no more descent needed.');
 	    break;
     }
   }
   
+  //console.log('Descent steps used: ' + i);
+  
   // produce the final estimation by multiplying P and Q
-  return P_model.x(Q_model); 
+  var finalModel = P_model.x(Q_model); 
+  
+  // if we were considering bias, we have to add it back in
+  if(bias)
+  {
+  		// add back the overall average
+  		finalModel = finalModel.map(function(x) { return x + bias.average; });
+  	
+		var finalElements = finalModel.elements;
+		
+		// add back the row bias from each row
+		for(var i = 1; i <= finalModel.rows(); i++)
+		{
+			for(var j = 1; j <= finalModel.cols(); j++)
+			{
+				finalElements[i-1][j-1] += bias.rowBiases.e(i);
+			}
+		}
+		
+		// add back the column bias from each column
+		for(var i = 1; i <= finalModel.rows(); i++)
+		{
+			for(var j = 1; j <= finalModel.cols(); j++)
+			{
+				finalElements[i-1][j-1] += bias.colBiases.e(j);
+			}
+		}
+  }
+  
+  return finalModel;
 }
 
 /**
@@ -118,10 +163,33 @@ function generateRandomMatrix(rows, columns)
  * @param input A matrix of the input values
  * @returns A matrix of size input.rows by input.columns where each entry is the difference between the input and estimated values.
  */
-function calculateError(estimated, input)
+function calculateError(estimated, input, bias)
 { 	
+	var adjustedInput = input.dup();
+	
+	// If bias adjustment is provided, adjust for it
+	if(bias)
+	{
+		var adjustedElements = adjustedInput.elements;
+		
+		// subtract the row and column bias from each row
+		for(var i = 0; i <= adjustedInput.rows()-1; i++)
+		{
+			for(var j = 0; j <= adjustedInput.cols()-1; j++)
+			{
+				if(adjustedElements[i][j] == 0) continue; // skip zeroes
+				
+				adjustedElements[i][j] -= bias.average;
+				
+				adjustedElements[i][j] -= bias.rowBiases.e(i+1);
+				
+				adjustedElements[i][j] -= bias.colBiases.e(j+1);
+			}
+		}
+	}
+
 	// Error is (R - R')
-	return input.subtract(estimated);
+	return adjustedInput.subtract(estimated);
 }
 
 /**
@@ -152,6 +220,113 @@ function calculateTotalError(errorMatrix)
 	}
 	
 	return totError;
+}
+
+/**
+ * Computes the biases from a matrix of values. 
+ * @param input A matrix of the input values
+ * @returns Bias Object containing the average, bias for rows and bias for columns.
+ */
+function calculateBias(inputMatrix)
+{
+	var average = calculateMatrixAverage(inputMatrix);
+	var rowAverages = calculateRowAverage(inputMatrix);
+	var colAverages = calculateColumnAverage(inputMatrix);
+	
+	var rowBiases = new Array();
+	var colBiases = new Array();
+	
+	// The row bias is the difference between the row average and the overall average
+	for(var i = 1; i <= rowAverages.dimensions().cols; i++)
+	{
+		rowBiases[i-1] = rowAverages.e(i) - average;
+	}
+	
+	// the column bias is the difference between the column average and the overall average
+	for(var i = 1; i <= colAverages.dimensions().cols; i++)
+	{
+		colBiases[i-1] = colAverages.e(i) - average;
+	}
+	
+	var biases = new Bias(average, $V(rowBiases), $V(colBiases));
+	
+	return biases;
+}
+
+/**
+ * Bias representation object. Contains all bias elements.
+ */
+function Bias(average, rowBiases, colBiases) {
+	this.average = average;		// Overall value average
+	this.rowBiases = rowBiases; // Bias for each row
+	this.colBiases = colBiases;	// Bias for each column
+}
+
+/**
+ * Computes the overall average value from a matrix of values. 
+ * @param input A matrix of the input values
+ * @returns float Average value.
+ */
+function calculateMatrixAverage(inputMatrix)
+{
+	var cells = inputMatrix.rows() * inputMatrix.cols();
+	
+	var sum = 0;
+	for(var i = 1; i <= inputMatrix.rows(); i++)
+	{
+		for(var j = 1; j <= inputMatrix.cols(); j++)
+		{
+			sum += inputMatrix.e(i, j);
+		}
+	}
+	
+	return sum/cells;
+}
+
+/**
+ * Computes the average value for each column of a matrix of values. 
+ * @param input A matrix of the input values
+ * @returns Vector Average value for each column. Vector[i] is the average for column i.
+ */
+function calculateColumnAverage(inputMatrix)
+{
+	var rows = inputMatrix.rows();
+	
+	var averages = new Array();
+	for(var i = 1; i <= inputMatrix.cols(); i++)
+	{
+		var sum = 0;
+		for(var j = 1; j <= inputMatrix.rows(); j++)
+		{
+			sum += inputMatrix.e(j, i);
+		}
+		averages[i-1] = sum/rows;
+	}
+	
+	return $V(averages);
+}
+
+/**
+ * Computes the average value for each row of a matrix of values. 
+ * @param input A matrix of the input values
+ * @returns Vector Average value for each row. Vector[i] is the average for row i.
+ */
+function calculateRowAverage(inputMatrix)
+{
+	var cols = inputMatrix.cols();
+	
+	var averages = new Array();
+	for(var i = 1; i <= inputMatrix.rows(); i++)
+	{
+		var sum = 0;
+		for(var j = 1; j <= inputMatrix.cols(); j++)
+		{
+			sum += inputMatrix.e(i, j);
+		}
+		averages[i-1] = sum/cols;
+	}
+	
+	return $V(averages);
 }
 
 /**
@@ -262,9 +437,22 @@ function findInArray(array, value)
 	return index;
 }
 
-module.exports.train = train;
+module.exports.buildModel = buildModel;
+module.exports.buildModelWithBias = buildModelWithBias;
 module.exports.generateRandomMatrix = generateRandomMatrix;
 module.exports.calculateError = calculateError;
 module.exports.calculateTotalError = calculateTotalError;
+module.exports.calculateBias = calculateBias;
+module.exports.calculateMatrixAverage = calculateMatrixAverage;
+module.exports.calculateColumnAverage = calculateColumnAverage;
+module.exports.calculateRowAverage = calculateRowAverage;
+
+module.exports.DESCENT_STEPS = DESCENT_STEPS;
+module.exports.ALPHA = ALPHA;
+module.exports.BETA = BETA;
+module.exports.K = K;
+module.exports.MAX_ERROR = MAX_ERROR;
+
+module.exports.Bias = Bias;
 module.exports.Model = Model;
 
