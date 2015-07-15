@@ -242,8 +242,9 @@ function calculateTotalError(errorMatrix)
  * @param input A matrix of the input values
  * @returns Bias Object containing the average, bias for rows and bias for columns.
  */
-function calculateBias(inputMatrix)
+function calculateBias(input)
 {
+	var inputMatrix = $M(input);
 	var average = calculateMatrixAverage(inputMatrix);
 	var rowAverages = calculateRowAverage(inputMatrix);
 	var colAverages = calculateColumnAverage(inputMatrix);
