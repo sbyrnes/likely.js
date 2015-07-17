@@ -105,7 +105,7 @@ exports['test calculateAverage#column'] = function(beforeExit, assert){
 
 // Test calculating matrix bias
 exports['test calculateBias#matrix'] = function(beforeExit, assert){
-	var input = $M([[2, 2],[2, 2],[2, 2]]);
+	var input = [[2, 2],[2, 2],[2, 2]];
 	
 	var bias = Recommender.calculateBias(input)
 	assert.equal(2, bias.average);
@@ -117,10 +117,10 @@ exports['test calculateBias#matrix'] = function(beforeExit, assert){
 	assert.equal(0, bias.colBiases.e(1));
 	assert.equal(0, bias.colBiases.e(2));
 	
-	input = $M([ [ 1, 2, 3, 0 ],
-			     [ 4, 0, 5, 6 ],
-			     [ 7, 8, 0, 9 ]
-		       ]);
+	input = [ [ 1, 2, 3, 0 ],
+			  [ 4, 0, 5, 6 ],
+			  [ 7, 8, 0, 9 ]
+		    ];
 	bias = Recommender.calculateBias(input)
 	assert.equal(3.75, bias.average);
 	assert.equal(3, bias.rowBiases.dimensions().cols);
@@ -181,9 +181,9 @@ exports['test Model#recommendations|withLabels'] = function(beforeExit, assert){
                         [ 7, 4, 0, 9, 0, 2, 0, 2 ]
                       ];
                       	
-    var bias = Recommender.calculateBias($M(inputMatrix));
+    var bias = Recommender.calculateBias(inputMatrix);
     
-    var model = Recommender.buildModelWithBias($M(inputMatrix), bias, rowLabels, colLabels);
+    var model = Recommender.buildModelWithBias(inputMatrix, bias, rowLabels, colLabels);
     
     var rowTwoArray = model.recommendations('Joe');
 
@@ -220,8 +220,8 @@ exports['test Model#rankAllItems|withBias|withoutLabels'] = function(beforeExit,
                         [ 5, 8, 0, 9 ]
                       ];  
                       	
-    var bias = Recommender.calculateBias($M(inputMatrix));
-    var model = Recommender.buildModelWithBias($M(inputMatrix), bias);
+    var bias = Recommender.calculateBias(inputMatrix);
+    var model = Recommender.buildModelWithBias(inputMatrix, bias);
     
     var rowTwoArray = model.rankAllItems(2);
     
