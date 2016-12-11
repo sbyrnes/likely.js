@@ -52,11 +52,11 @@ function train(inputMatrix, bias)
   M = inputMatrix.cols(); // number of columns
   
   // Generate random P and Q based on the dimensions of inputMatrix
-  var P_model = generateRandomMatrix(N, K);
-  var Q_model = generateRandomMatrix(K, M);
+  var P_model = generateRandomMatrix(N, module.exports.K);
+  var Q_model = generateRandomMatrix(module.exports.K, M);
   
   var i = 0
-  for(i = 0; i < DESCENT_STEPS; i++)
+  for(i = 0; i < module.exports.DESCENT_STEPS; i++)
   {
   	//console.log('------------------ Iteration --------------------');
     // Calculate error
@@ -74,7 +74,7 @@ function train(inputMatrix, bias)
     {
     	for (var col = 0; col < M; col++)
     	{
-    		for(var feature = 0; feature < K; feature++)
+    		for(var feature = 0; feature < module.exports.K; feature++)
     		{
     			// update formulas will change values in the opposite direction of the gradient.
     			
@@ -84,8 +84,8 @@ function train(inputMatrix, bias)
     			// Regularization factor: alpha * beta * p_ik 
     			var p_prev = P_prime[row][feature];
     			P_prime[row][feature] = P_prime[row][feature] + 
-    									  ALPHA*(error.e(row+1, col+1)*Q_prime[feature][col] -
-    									  	    BETA * P_prime[row][feature]);
+    									  module.exports.ALPHA*(error.e(row+1, col+1)*Q_prime[feature][col] -
+    									  	    module.exports.BETA * P_prime[row][feature]);
     			//console.log('P['+row+']['+feature+'] ('+p_prev+') <- ('+P_prime[row][feature]+')');
     									  	   
     			// Q Update Formula
@@ -94,8 +94,8 @@ function train(inputMatrix, bias)
     			// Regularization factor: alpha * beta * q_kj  
     			var q_prev = Q_prime[feature][col];
   				Q_prime[feature][col] = Q_prime[feature][col] +
-  											 ALPHA *(error.e(row+1, col+1)*P_prime[row][feature] -
-  											 		BETA * Q_prime[feature][col]);  	
+  											 module.exports.ALPHA *(error.e(row+1, col+1)*P_prime[row][feature] -
+  											 		module.exports.BETA * Q_prime[feature][col]);  	
     			//console.log('Q['+feature+']['+col+'] ('+q_prev+') <- ('+Q_prime[feature][col]+')');								  	    
     									  	
             }
@@ -104,7 +104,7 @@ function train(inputMatrix, bias)
     
     // if we've already reached the error threshold, no need to descend further
     var totError = calculateTotalError(error);
-    if(totError < MAX_ERROR)
+    if(totError < module.exports.MAX_ERROR)
     {
     	//console.log('Reached error threshold early, no more descent needed.');
 	    break;
