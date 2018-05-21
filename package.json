@@ -14,8 +14,10 @@
     "learning",
     "matrix"
   ],
-  "homepage" : "https://github.com/sbyrnes/likely.js",
-  "bugs" : { "url" : "https://github.com/sbyrnes/likely.js/issues"},
+  "homepage": "https://github.com/sbyrnes/likely.js",
+  "bugs": {
+    "url": "https://github.com/sbyrnes/likely.js/issues"
+  },
   "main": "./likely.js",
   "maintainers": [
     {
@@ -24,11 +26,15 @@
       "url": "http://fogstack.com"
     }
   ],
-  "repository" :
-    { "type" : "git",
-      "url" : "https://github.com/sbyrnes/likely.js"
-    },
-  "dependencies": { "sylvester" : ">=0.0.21" },
-  "devDependencies": { "expresso" : ">=0.9.2" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sbyrnes/likely.js"
+  },
+  "dependencies": {
+    "sylvester": ">=0.0.21"
+  },
+  "devDependencies": {
+    "expresso": ">=0.9.2"
+  },
   "optionalDependencies": {}
 }

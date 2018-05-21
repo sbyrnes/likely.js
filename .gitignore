@@ -1,2 +1,4 @@
 .DS_Store
 node_modules
+saved-model.json
+package-lock.json
