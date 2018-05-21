@@ -232,6 +232,35 @@ exports['test Model#rankAllItems|withBias|withoutLabels'] = function(beforeExit,
     assert.equal(0, rowTwoArray[3][0]);            
 };
 
+
+// Test to save a model
+exports['test Save#ModelAsync'] = function(beforeExit, assert,done){
+	var inputMatrix = [ [ 1, 2, 3, 0, 2, 5, 1, 3 ],
+		[ 4, 0, 5, 6, 3, 1, 0, 0 ],
+		[ 7, 8, 0, 9, 0, 2, 0, 5 ]
+	];
+		
+	var model = Recommender.buildModel($M(inputMatrix));
+	model.save('test/saved-model.json');
+};
+
+// Test to load a model
+exports['test Load#Model'] = function(beforeExit, assert){
+	var inputMatrix = [ [ 1, 2, 3, 0, 2, 5, 1, 3 ],
+		[ 4, 0, 5, 6, 3, 1, 0, 0 ],
+		[ 7, 8, 0, 9, 0, 2, 0, 5 ]
+	];
+		
+	var model = Recommender.loadModel('test/saved-model.json');
+
+	var rowTwoArray = model.recommendations(1);
+
+	assert.equal(3, rowTwoArray.length);    
+	assert.equal(1, rowTwoArray[0][0]);  
+	assert.equal(7, rowTwoArray[1][0]);       
+	assert.equal(6, rowTwoArray[2][0]);             
+};
+
 // Test setting constants
 exports['test Constants#values'] = function(beforeExit, assert){
 	assert.equal(5000, Recommender.DESCENT_STEPS);

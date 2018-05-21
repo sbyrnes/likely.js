@@ -4,6 +4,7 @@
  * Javascript library for collaborative filtering / recommendation engine. 
  */
 var sylvester = require('sylvester');
+var fs = require('fs');
  
 // Learning parameters
 var DESCENT_STEPS = 5000; // number of iterations to execute gradient descent 
@@ -11,6 +12,18 @@ var ALPHA = 0.0005;       // learning rate, should be small
 var BETA = 0.0007;        // regularization factor, should be small
 var K = 5; 				  // number of features to simulate
 var MAX_ERROR = 0.0005;	  // threshold which, if reached, will stop descent automatically
+
+/** Load a complete restored model from path file
+ *
+ * @param saved A path from a previous saved model
+ * @returns Model An instance of a Model object
+ */
+function loadModel(saved){
+	var model=fs.readFileSync(saved,{ encoding: 'utf8' });
+	return new Model(JSON.parse(model));
+}
+
+
 
 /** Builds a complete model from the input array 
  *
@@ -347,15 +360,31 @@ function calculateRowAverage(inputMatrix)
 
 /**
  * Model representation object. Contains both input and estimated values.
+ * A model can be restored as inputMatric value
  */
-function Model(inputMatrix, rowLabels, colLabels) {
+function Model(inputMatrixOrModel, rowLabels, colLabels) {
+	//
+	// load saved
+	if(inputMatrixOrModel.input&&
+		 inputMatrixOrModel.estimated){
+			if(inputMatrixOrModel.colLabels){
+				this.colLabels = inputMatrixOrModel.colLabels; 
+			}
+			if(inputMatrixOrModel.rowLabels){
+				this.rowLabels = inputMatrixOrModel.rowLabels; 
+			}
+			this.input = sylvester.Matrix.create(inputMatrixOrModel.input);	// input data		
+			this.estimated=sylvester.Matrix.create(inputMatrixOrModel.estimated);
+			return this;
+	}
 	this.rowLabels = rowLabels;	// labels for the rows
 	this.colLabels = colLabels; // labels for the columns
-	this.input = inputMatrix;	// input data
+	this.input = inputMatrixOrModel;	// input data
 	
 	// estimated data, initialized to all zeros
 	this.estimated = sylvester.Matrix.Zeros(this.input.rows(),this.input.cols());
 }
+
 Model.prototype = {
 	/**
 	 * Returns all items for a given row, sorted by rating.
@@ -429,7 +458,22 @@ Model.prototype = {
 		}
 		
 		return recommendedItems;
-	}	
+	},
+	/**
+	 * Save the current model
+	 * @param path file destination 
+	 */
+	save:function(path){
+		var content = JSON.stringify(this,0,2);
+		// var promisify=require('util').promisify;		
+		// var writeFile = promisify(fs.writeFile);
+		// return writeFile(path, content, 'utf8', function (err) {
+		// 	if (err) {
+		// 		return console.log('ERROR',err);
+		// 	}
+		// }); 						
+		return fs.writeFileSync(path,content,'utf8');
+	}
 }
 
 /**
@@ -453,6 +497,7 @@ function findInArray(array, value)
 	return index;
 }
 
+module.exports.loadModel = loadModel;
 module.exports.buildModel = buildModel;
 module.exports.buildModelWithBias = buildModelWithBias;
 module.exports.generateRandomMatrix = generateRandomMatrix;
